@@ -2,7 +2,6 @@
 SerpAPI client for flight searches.
 """
 import asyncio
-import json
 from typing import Dict, Any
 from serpapi import GoogleSearch
 from mcp_flight_search.utils.logging import logger
@@ -19,7 +18,16 @@ async def run_search(params: Dict[str, Any]):
         Search results from SerpAPI
     """
     try:
-        logger.debug(f"Sending SerpAPI request with params: {json.dumps(params, indent=2)}")
+        logger.debug(
+            "Sending SerpAPI request: engine=%s route=%s->%s outbound=%s return=%s currency=%s type=%s",
+            params.get("engine"),
+            params.get("departure_id"),
+            params.get("arrival_id"),
+            params.get("outbound_date"),
+            params.get("return_date"),
+            params.get("currency"),
+            params.get("type"),
+        )
         result = await asyncio.to_thread(lambda: GoogleSearch(params).get_dict())
         logger.debug(f"SerpAPI response received, keys: {list(result.keys())}")
         return result
@@ -27,7 +35,13 @@ async def run_search(params: Dict[str, Any]):
         logger.exception(f"SerpAPI search error: {str(e)}")
         return {"error": str(e)}
 
-def prepare_flight_search_params(origin: str, destination: str, outbound_date: str, return_date: str = None) -> Dict[str, Any]:
+def prepare_flight_search_params(
+    origin: str,
+    destination: str,
+    outbound_date: str,
+    return_date: str = None,
+    currency: str = "USD",
+) -> Dict[str, Any]:
     """
     Prepare parameters for a flight search.
     
@@ -36,6 +50,7 @@ def prepare_flight_search_params(origin: str, destination: str, outbound_date: s
         destination: Arrival airport code
         outbound_date: Departure date (YYYY-MM-DD)
         return_date: Return date for round trips (YYYY-MM-DD)
+        currency: ISO 4217 currency code for the returned prices
         
     Returns:
         Dictionary of parameters for SerpAPI
@@ -48,7 +63,7 @@ def prepare_flight_search_params(origin: str, destination: str, outbound_date: s
         "departure_id": origin.strip().upper(),
         "arrival_id": destination.strip().upper(),
         "outbound_date": outbound_date,
-        "currency": "USD",
+        "currency": currency.strip().upper(),
         "type": "2"  # One-way trip by default
     }
     

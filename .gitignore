@@ -25,14 +25,25 @@ venv/
 env/
 ENV/
 
-# Editor files
+# Logs
+*.log
+
+# Environments & Keys
+.env
+.env.*
+.venv/
+env/
+venv/
+uv.lock
+.cache/
+
+# Editor & MCP local
+.mcp.json
+.system_generated/
 .idea/
 .vscode/
 *.swp
 *.swo
-
-# Logs
-*.log
 
 # OS specific files
 .DS_Store

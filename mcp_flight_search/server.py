@@ -38,23 +38,51 @@ def register_tools(mcp):
         mcp: The MCP server instance
     """
     @mcp.tool()
-    async def search_flights_tool(origin: str, destination: str, outbound_date: str, return_date: str = None):
+    async def search_flights_tool(
+        origin: str,
+        destination: str,
+        outbound_date: str,
+        return_date: str = None,
+        currency: str = "USD",
+        no_cache: bool = False,
+    ):
         """
         Search for flights using SerpAPI Google Flights.
         
         This MCP tool allows AI models to search for flight information by specifying
-        departure and arrival airports and travel dates.
+        departure and arrival airports (or city names) and travel dates.
         
         Args:
-            origin: Departure airport code (e.g., ATL, JFK)
-            destination: Arrival airport code (e.g., LAX, ORD)
+            origin: Departure airport code or city name (e.g., ATL, JFK, Hanoi, 河内)
+            destination: Arrival airport code or city name (e.g., LAX, ORD, Guilin, 桂林)
             outbound_date: Departure date (YYYY-MM-DD)
             return_date: Return date for round trips (YYYY-MM-DD)
+            currency: ISO 4217 currency code for returned prices (default: USD)
+            no_cache: Whether to bypass local cache
             
         Returns:
             A list of available flights with details
         """
-        return await search_flights(origin, destination, outbound_date, return_date)
+        return await search_flights(origin, destination, outbound_date, return_date, currency=currency, use_cache=not no_cache)
+
+    @mcp.tool()
+    def ground_alternative_tool(origin: str, destination: str):
+        """
+        Check if there are faster/cheaper ground or high-speed rail alternatives between two cities/airports.
+        
+        Args:
+            origin: Origin airport code or city name
+            destination: Destination airport code or city name
+            
+        Returns:
+            Travel recommendation if a strong ground/rail route exists
+        """
+        from mcp_flight_search.utils.airports import resolve_airport
+        from mcp_flight_search.utils.ground_alternatives import get_ground_alternative
+        orig_code = resolve_airport(origin)
+        dest_code = resolve_airport(destination)
+        alt = get_ground_alternative(orig_code, dest_code)
+        return {"alternative": alt} if alt else {"alternative": None, "message": "No specific ground alternative advice registered."}
 
     @mcp.tool()
     def server_status():

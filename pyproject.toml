@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcp-flight-search"
-version = "0.2.0"
+version = "0.3.0"
 description = "Flight search service implementing  Model Context Protocol (MCP) tools"
 readme = "README.md"
 authors = [
     {name = "Arjun Prabhulal", email = "code.aicloudlab@gmail.com"}
 ]
 license = "MIT"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
