@@ -1,6 +1,6 @@
 # MCP Flight Search (Enhanced) ✈️
 
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![AGPL-3.0 License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![MCP Standard](https://img.shields.io/badge/MCP-Standard-green.svg)](https://modelcontextprotocol.io/)
 [![Unit Tests](https://img.shields.io/badge/tests-11%2F11%20passing-brightgreen.svg)](tests/)
@@ -176,4 +176,4 @@ uv run python3 -m unittest discover -s tests
 
 - Original base project created by [Arjun Prabhulal](https://github.com/arjunprabhulal/mcp-flight-search).
 - Enhanced & maintained by [Vec Yang](https://github.com/vecyang1).
-- Licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
+- Licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. See [LICENSE](LICENSE) for details.

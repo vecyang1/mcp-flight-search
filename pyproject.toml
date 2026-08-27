@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [
     {name = "Arjun Prabhulal", email = "code.aicloudlab@gmail.com"}
 ]
-license = "MIT"
+license = "AGPL-3.0-or-later"
 requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",

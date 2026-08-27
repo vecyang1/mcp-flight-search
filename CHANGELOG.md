@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- **Relicense to AGPL-3.0**: Switched project license to GNU Affero General Public License v3.0 (AGPL-3.0) for stronger open-source copyleft protection across network services.
 - **AeroDataBox Integration**: Unified live commercial flight status, terminals, gates, baggage claim belts, and delay minutes by flight number (`python3 flight_search.py status <FLIGHT_NUMBER>`).
 - **Airport FIDS Flight Boards**: Added real-time airport arrival and departure boards with `--direction` and `--hours` filters (`python3 flight_search.py fids <AIRPORT_CODE>`).
 - **Airport Metadata & Weather**: Added airport technical details, runways, and timezone (`python3 flight_search.py airport <AIRPORT_CODE>`).
