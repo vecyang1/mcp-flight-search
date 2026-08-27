@@ -68,36 +68,36 @@ export SERP_API_KEY="your_serpapi_key_here"
 Search flights directly from your terminal:
 
 ```bash
-# Search by IATA code or City Name (English / Chinese)
-python3 flight_search.py HAN KWL 2026-09-02
-python3 flight_search.py 河内 桂林 2026-09-02 --currency CNY
+# Search by Airport Code or City Name (English / Local)
+python3 flight_search.py NRT BKK 2026-10-15 --currency USD
+python3 flight_search.py Tokyo Bangkok 2026-10-15 --currency USD
 
 # Multi-day price trend scan (finds daily lowest across N days)
-python3 flight_search.py 河内 广州 2026-09-01 --days 7 --currency CNY
+python3 flight_search.py Tokyo Bangkok 2026-10-10 --days 7 --currency USD
 
 # Round-trip flight search
-python3 flight_search.py SGN CAN 2026-09-10 --return-date 2026-09-20 --currency CNY
+python3 flight_search.py TYO SIN 2026-11-01 --return-date 2026-11-10 --currency USD
 
 # Force live query (bypass local cache)
-python3 flight_search.py HAN BKK 2026-09-05 --no-cache
+python3 flight_search.py HND BKK 2026-10-15 --no-cache
 
 # Export to CSV or JSON
-python3 flight_search.py SGN HND 2026-09-15 --format csv --output-file tokyo_flights.csv
+python3 flight_search.py NRT BKK 2026-10-15 --format csv --output-file tokyo_bangkok.csv
 ```
 
 ### Example Terminal Output
 
 ```text
-🔍 Route: 河内 (HAN) -> 桂林 (KWL) | 1 date(s)
-Date         Price      Airline            Dep/Arr                             Dur      Stops                   
+🔍 Route: Tokyo (NRT) -> Bangkok (BKK) | 1 date(s)
+Date         Price (USD) Airline            Dep/Arr                             Dur     Stops                   
 ------------------------------------------------------------------------------------------------------------------
-2026-09-02   873        Shandong           2026-09-02 02:20 -> 2026-09-02 17:50 14h 30m  Jinan Yaoqiang (8h 40m) 
-2026-09-02   2105       Shenzhen           2026-09-02 15:05 -> 2026-09-03 15:40 23h 35m  Shenzhen Bao'an (3h 40m)
-2026-09-02   2165       Shenzhen           2026-09-02 15:05 -> 2026-09-03 12:05 20h 0m   Shenzhen Bao'an (3h 15m)
+2026-10-15   $185        Zipair             2026-10-15 09:15 -> 2026-10-15 14:10 6h 55m  Non-stop
+2026-10-15   $215        AirAsia X          2026-10-15 11:30 -> 2026-10-15 16:35 7h 5m   Non-stop
+2026-10-15   $295        Thai Airways       2026-10-15 12:00 -> 2026-10-15 16:50 6h 50m  Non-stop
 ------------------------------------------------------------------------------------------------------------------
-✨ Cheapest: 2026-09-02 at 873 (Shandong)
+✨ Cheapest: 2026-10-15 at $185 (Zipair, Non-stop)
 
-💡 陆路/高铁优选建议：河内 ➔ 桂林直飞较少，转机需14~17小时(约¥850~2000+)。更优方案为【陆路大巴过友谊关至南宁(约4~5h, ¥150~200)】+【南宁东高铁至桂林(2h, ¥108)】，全程约6~7小时，总花费仅约¥260~330($40左右)，省时又省钱。
+💡 Ground/Rail Advisor: For regional city pairs (e.g., Tokyo ➔ Osaka, Shenzhen ➔ Hong Kong), high-speed rail options (Shinkansen bullet train / HSR) are automatically evaluated and recommended if faster and more cost-effective than flying.
 ```
 
 ---
@@ -126,11 +126,11 @@ To use this server with **Claude Desktop**, **Cursor**, **Windsurf**, or **Antig
 ### Exposed MCP Tools
 
 1. **`search_flights_tool`**:
-   - `origin` *(string)*: Departure airport code or city name (e.g. `HAN`, `Hanoi`, `河内`)
-   - `destination` *(string)*: Arrival airport code or city name (e.g. `KWL`, `Guilin`, `桂林`)
+   - `origin` *(string)*: Departure airport code or city name (e.g. `NRT`, `Tokyo`, `HND`, `JFK`)
+   - `destination` *(string)*: Arrival airport code or city name (e.g. `BKK`, `Bangkok`, `SIN`, `LHR`)
    - `outbound_date` *(string)*: Departure date (`YYYY-MM-DD`)
    - `return_date` *(string, optional)*: Return date for round trips (`YYYY-MM-DD`)
-   - `currency` *(string, default "USD")*: ISO 4217 currency code (`USD`, `CNY`, `EUR`, etc.)
+   - `currency` *(string, default "USD")*: ISO 4217 currency code (`USD`, `EUR`, `GBP`, `JPY`, `CNY`)
    - `no_cache` *(boolean, default false)*: Force live search bypassing local cache
 2. **`ground_alternative_tool`**:
    - `origin` *(string)*: Origin airport or city name
@@ -149,11 +149,11 @@ from mcp_flight_search.utils.ground_alternatives import get_ground_alternative
 
 async def main():
     # Pass city names or airport codes directly
-    flights = await search_flights("河内", "桂林", "2026-09-02", currency="CNY")
+    flights = await search_flights("Tokyo", "Bangkok", "2026-10-15", currency="USD")
     for f in flights[:3]:
-        print(f"{f['airline']} | {f['price']} | {f['departure']} -> {f['arrival']} | Stops: {f['transit_cities']}")
+        print(f"{f['airline']} | ${f['price']} | {f['departure']} -> {f['arrival']} | Stops: {f['transit_cities']}")
         
-    tip = get_ground_alternative("HAN", "KWL")
+    tip = get_ground_alternative("TYO", "OSA")
     if tip:
         print(tip)
 
