@@ -75,6 +75,23 @@ uv run python3 -m unittest discover -s tests
 - **API Key**: Managed in `.env` (`SERP_API_KEY=...`) or environment variable.
 - **MCP Server**: FastMCP server in `mcp_flight_search/server.py` supporting `stdio` and `sse`.
 
+## 🌐 2nd Brain Cross-Tool Travel Ecosystem Workflow
+
+When planning comprehensive itineraries, travel budgets, or digital nomad relocation, use the **2nd Brain Travel Suite** unified pipeline:
+
+| Stage | Tool / Skill | Route | Capability |
+| :--- | :--- | :--- | :--- |
+| **1. Transit & Flight** | `mcp-flight-search` | `~/.gemini/antigravity/skills/mcp-flight-search` | Real-time airfare, multi-day fare trends, high-speed rail / coach alternatives |
+| **2. Hotel & Stay** | `agoda-orders-cli` / `agoda-price-tracker` | `{A_CODING}/26.06.15-agoda-orders-cli` | Historical stay records, hotel pricing intelligence, booking ledger |
+| **3. Activities & Tours**| `activity-intel-cli` | `{A_CODING}/26.08.26-activity-intel-cli` | Bookable OTA experiences, Klook tours, Airbnb Experiences, Chinese guide filters |
+| **4. Living Costs** | `citycost-cli` | `{A_CODING}/26.08.25-citycost-cli` | Global nomad cost of living, monthly rental estimates, safety & weather comparison |
+
+### Standard Multi-Agent Trip Planner SOP:
+1. **Query Flights**: Call `mcp-flight-search` with departure/arrival cities and date range to identify the optimal transit day and cheapest airline/rail option.
+2. **Estimate Living & Lodging Costs**: Query `citycost-cli` for baseline daily/monthly expenditure; query `agoda-orders-cli` for hotel tier analysis.
+3. **Discover Local Activities**: Run `activity-intel-cli search "<city>"` to retrieve top-rated local activities and excursions.
+4. **Synthesize Final Travel Matrix**: Assemble transit, lodging, and activity quotes into a single cohesive markdown itinerary.
+
 ## 🧬 Self-Evolution (Autopoiesis)
 
 **Post-Task Reflection**: 
