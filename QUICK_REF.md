@@ -1,32 +1,30 @@
-# Flight Search Skill - Quick Reference
+# MCP Flight Search & AeroDataBox Quick Reference
 
-## Quick CLI Usage
-
+## Commands
 ```bash
-# Basic single-date search (supports IATA codes or city names)
-python3 ~/.gemini/antigravity/skills/mcp-flight-search/flight_search.py HAN KWL 2026-09-02
-python3 ~/.gemini/antigravity/skills/mcp-flight-search/flight_search.py 河内 桂林 2026-09-02 --currency CNY
+# Flight Price Search
+python3 flight_search.py HAN KWL 2026-09-02 --currency CNY
+python3 flight_search.py 河内 广州 2026-09-01 --days 7 --currency CNY
 
-# Multi-day search (scans N days, finds cheapest per day)
-python3 ~/.gemini/antigravity/skills/mcp-flight-search/flight_search.py 河内 广州 2026-09-01 --days 7 --currency CNY
+# Live Flight Status (AeroDataBox)
+python3 flight_search.py status VN123 2026-08-27
+python3 flight_search.py status CA981 --format json
 
-# Round trip
-python3 ~/.gemini/antigravity/skills/mcp-flight-search/flight_search.py SGN CAN 2026-09-10 --return-date 2026-09-20
+# Airport FIDS Flight Boards (AeroDataBox)
+python3 flight_search.py fids HAN --direction arrival --hours 6
+python3 flight_search.py fids SGN --direction departure
 
-# Force live query (skip cache)
-python3 ~/.gemini/antigravity/skills/mcp-flight-search/flight_search.py HAN BKK 2026-09-05 --no-cache
+# Airport Details
+python3 flight_search.py airport HAN
 ```
 
-## Features
+## MCP Server Tools
+- `search_flights_tool`: Google Flights SerpAPI pricing
+- `flight_status_tool`: AeroDataBox live status, delays, gates, baggage
+- `airport_fids_tool`: AeroDataBox airport arrival/departure board
+- `airport_info_tool`: AeroDataBox airport technical metadata
+- `ground_alternative_tool`: High-speed rail / ground alternatives
 
-1. **City Name Auto-Resolution**: Pass `河内`, `桂林`, `广州`, `Hanoi`, `Bangkok`, etc. directly.
-2. **Built-in Smart Caching**: Results cached in `~/.cache/mcp_flight_search/` for 2 hours.
-3. **Ground/Rail Alternatives**: Auto-suggests high-speed rail/buses for corridors where flying is inefficient.
-4. **Full Tier Parsing**: Ingests both `best_flights` and `other_flights` + exact layover duration.
-
-## Test Verification
-
-```bash
-cd ~/.gemini/antigravity/skills/mcp-flight-search
-uv run python3 -m unittest discover -s tests
-```
+## Environment & 1Password
+- `SERP_API_KEY`: SerpAPI Search Key (`.env` or env var)
+- `AERODATABOX_API_KEY`: 1Password `op://Agent Automation/4yoyezeykzvblmlu7kc3pce3pm/credential`

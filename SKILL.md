@@ -1,11 +1,11 @@
 ---
 name: mcp-flight-search
-description: Quick flight search using SerpAPI Google Flights. Real-time pricing from airlines.
+description: Global flight pricing & schedule search (Google Flights SerpAPI), live flight status & delay tracking (AeroDataBox: gates, terminals, baggage belts), airport FIDS flight boards, airport info/METAR, and ground rail alternatives.
 ---
 
-# Flight Search Skill (`mcp-flight-search`)
+# Flight Search & Aviation Intelligence Skill (`mcp-flight-search`)
 
-Search affordable flights using SerpAPI Google Flights integration with local caching, smart city/IATA resolution, and ground travel alternatives.
+Comprehensive aviation and flight intelligence suite integrating **SerpAPI Google Flights** (airfare pricing & schedules), **AeroDataBox** (live commercial flight status, terminals, gates, baggage claim, delay minutes, and airport FIDS boards), and **ground high-speed rail alternative advice**.
 
 ## Quick Commands
 
@@ -13,7 +13,10 @@ Search affordable flights using SerpAPI Google Flights integration with local ca
 # Navigate to skill directory
 cd ~/.gemini/antigravity/skills/mcp-flight-search
 
-# Basic: One-way by airport code or city name (English/Chinese)
+# ==========================================
+# 1. Google Flights Price & Itinerary Search
+# ==========================================
+# One-way by airport code or city name (English/Chinese)
 python3 flight_search.py HAN KWL 2026-09-02
 python3 flight_search.py 河内 桂林 2026-09-02 --currency CNY
 
@@ -23,42 +26,60 @@ python3 flight_search.py 河内 广州 2026-09-01 --days 7 --currency CNY
 # Round trip
 python3 flight_search.py SGN CAN 2026-09-10 --return-date 2026-09-20 --currency CNY
 
-# Bypass cache for live fetch
-python3 flight_search.py HAN BKK 2026-09-05 --no-cache
+# ==========================================
+# 2. AeroDataBox Live Flight Status & Delays
+# ==========================================
+# Query flight by number: terminal, gate, baggage belt, actual vs scheduled times, delays
+python3 flight_search.py status VN123 2026-08-27
+python3 flight_search.py status CA981 --format json
+
+# ==========================================
+# 3. Airport FIDS Live Flight Boards
+# ==========================================
+# Query airport arrivals or departures board (next 6 hours)
+python3 flight_search.py fids HAN --direction arrival --hours 6
+python3 flight_search.py fids SGN --direction departure
+
+# ==========================================
+# 4. Airport Technical Info & Geography
+# ==========================================
+python3 flight_search.py airport HAN
+python3 flight_search.py airport PVG
 ```
 
-## Features & Capabilities
+## Features & Architectural Safeguards
 
-- **Smart Airport & City Resolver**: Supports 3-letter IATA codes (`HAN`, `KWL`, `SGN`, `CAN`, `PVG`) as well as city names in English and Chinese (`河内`, `桂林`, `胡志明`, `广州`, `上海`, `曼谷`, `东京`, `伦敦`, etc.).
-- **Automatic Caching**: Stores search results in `~/.cache/mcp_flight_search/flight_cache.json` (2-hour TTL) to prevent draining SerpAPI quota on repeated checks.
-- **Full Coverage (`best_flights` + `other_flights`)**: Ingests all flight tiers so regional/low-frequency routes are never falsely reported as "no flights".
-- **Exact Layover Parsing**: Shows exact layover durations (e.g. `厦门高崎 (13h 10m)`) parsed from SerpAPI layover data.
-- **Ground & High-Speed Rail Alternative Advisor**: Detects cross-border and regional corridors (e.g., Hanoi ➔ Guilin / Nanning, Shenzhen ➔ Hong Kong, Shanghai ➔ Hangzhou, Tokyo ➔ Osaka) where high-speed trains or coaches are faster, cheaper, and more convenient than multi-stop flights.
-- **Multi-Currency Support**: Supports any ISO 4217 currency (`CNY`, `USD`, `EUR`, `VND`, etc.) with robust regex price parsing.
-- **Output Formats**:
-  - `table`: Human-readable terminal table with dep/arr times, durations, stops, and travel advice.
-  - `json`: Structured raw data for downstream agent processing.
-  - `csv`: Exportable spreadsheet format (`--output-file flights.csv`).
+- **Multi-Modal Aviation Suite**: Combines commercial airfare search (SerpAPI), live flight ops / gate / delay tracking (AeroDataBox), and real-time aircraft physics telemetry (`opensky-network-cli`).
+- **1Password Integration**: Resolves credentials seamlessly via 1Password:
+  - SerpAPI: `.env` / environment variable `SERP_API_KEY`
+  - AeroDataBox: `op://Agent Automation/4yoyezeykzvblmlu7kc3pce3pm/credential` (RapidAPI)
+- **Quota Protection & Rate Limiting**:
+  - SerpAPI: 2-hour local caching in `~/.cache/mcp_flight_search/flight_cache.json`.
+  - AeroDataBox: Local file caching in `~/.cache/mcp_flight_search/aerodatabox_cache.json` (15m status, 24h airport info) + strict 1 req/s throttling to safeguard the 600 monthly unit allowance.
+- **FastMCP Server**: Exposes 4 tools for AI Agents:
+  - `search_flights_tool(origin, destination, outbound_date, ...)`
+  - `flight_status_tool(flight_number, date)`
+  - `airport_fids_tool(airport_code, direction, hours)`
+  - `airport_info_tool(airport_code)`
+  - `ground_alternative_tool(origin, destination)`
 
 ## Python / Service Usage
 
 ```python
 import asyncio
-import sys
-sys.path.insert(0, '/Users/vecsatfoxmailcom/.gemini/antigravity/skills/mcp-flight-search')
 from mcp_flight_search.services.search_service import search_flights
-from mcp_flight_search.utils.airports import resolve_airport
-from mcp_flight_search.utils.ground_alternatives import get_ground_alternative
+from mcp_flight_search.services.aerodatabox_service import get_flight_status, get_airport_fids
 
 async def example():
-    # Pass city names or airport codes directly
+    # 1. Search flight price
     flights = await search_flights("河内", "桂林", "2026-09-02", currency="CNY")
     print(f"Found {len(flights)} flights. Cheapest: {flights[0]['price']}")
-    
-    # Ground alternative advice
-    tip = get_ground_alternative("HAN", "KWL")
-    if tip:
-        print(tip)
+
+    # 2. Check live flight status
+    status = get_flight_status("VN123", "2026-08-27")
+    if status:
+        f = status[0]
+        print(f"Status: {f['status']} | Gate: {f['departure']['gate']} -> {f['arrival']['gate']}")
 
 asyncio.run(example())
 ```
@@ -70,27 +91,15 @@ cd ~/.gemini/antigravity/skills/mcp-flight-search
 uv run python3 -m unittest discover -s tests
 ```
 
-## Configuration
-
-- **API Key**: Managed in `.env` (`SERP_API_KEY=...`) or environment variable.
-- **MCP Server**: FastMCP server in `mcp_flight_search/server.py` supporting `stdio` and `sse`.
-
-## 🌐 2nd Brain Cross-Tool Travel Ecosystem Workflow
-
-When planning comprehensive itineraries, travel budgets, or digital nomad relocation, use the **2nd Brain Travel Suite** unified pipeline:
+## 🌐 2nd Brain Travel Ecosystem Workflow
 
 | Stage | Tool / Skill | Route | Capability |
 | :--- | :--- | :--- | :--- |
-| **1. Transit & Flight** | `mcp-flight-search` | `~/.gemini/antigravity/skills/mcp-flight-search` | Real-time airfare, multi-day fare trends, high-speed rail / coach alternatives |
-| **2. Hotel & Stay** | `agoda-orders-cli` / `agoda-price-tracker` | `{A_CODING}/26.06.15-agoda-orders-cli` | Historical stay records, hotel pricing intelligence, booking ledger |
-| **3. Activities & Tours**| `activity-intel-cli` | `{A_CODING}/26.08.26-activity-intel-cli` | Bookable OTA experiences, Klook tours, Airbnb Experiences, Chinese guide filters |
-| **4. Living Costs** | `citycost-cli` | `{A_CODING}/26.08.25-citycost-cli` | Global nomad cost of living, monthly rental estimates, safety & weather comparison |
-
-### Standard Multi-Agent Trip Planner SOP:
-1. **Query Flights**: Call `mcp-flight-search` with departure/arrival cities and date range to identify the optimal transit day and cheapest airline/rail option.
-2. **Estimate Living & Lodging Costs**: Query `citycost-cli` for baseline daily/monthly expenditure; query `agoda-orders-cli` for hotel tier analysis.
-3. **Discover Local Activities**: Run `activity-intel-cli search "<city>"` to retrieve top-rated local activities and excursions.
-4. **Synthesize Final Travel Matrix**: Assemble transit, lodging, and activity quotes into a single cohesive markdown itinerary.
+| **1. Flight Search & Airfare** | `mcp-flight-search` | `~/.gemini/antigravity/skills/mcp-flight-search` | Commercial airfare trends, schedules, rail alternatives |
+| **2. Flight Ops & Gate Tracking**| `mcp-flight-search` (`status` / `fids`) | `~/.gemini/antigravity/skills/mcp-flight-search` | Live delays, terminals, gates, baggage claim, airport flight boards |
+| **3. Aircraft Radar Telemetry** | `opensky-network-cli` | `~/.gemini/antigravity/skills/opensky-network-cli` | ADS-B live physics radar (lat/lon, altitude, speed, squawk) |
+| **4. Hotel & Accommodation** | `agoda-orders-cli` / `agoda-price-tracker` | `{A_CODING}/26.06.15-agoda-orders-cli` | Hotel booking records, pricing intelligence |
+| **5. Activities & Tours** | `activity-intel-cli` | `{A_CODING}/26.08.26-activity-intel-cli` | Bookable experiences, Klook tours, Airbnb Experiences |
 
 ## 🧬 Self-Evolution (Autopoiesis)
 

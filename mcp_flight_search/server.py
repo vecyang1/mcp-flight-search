@@ -66,6 +66,66 @@ def register_tools(mcp):
         return await search_flights(origin, destination, outbound_date, return_date, currency=currency, use_cache=not no_cache)
 
     @mcp.tool()
+    def flight_status_tool(
+        flight_number: str,
+        date: str = None,
+        no_cache: bool = False,
+    ):
+        """
+        Get live commercial flight status, terminals, gates, baggage belt, delays, and aircraft model via AeroDataBox.
+        
+        Args:
+            flight_number: Airline flight number (e.g. VN123, CA981, AF123)
+            date: Flight date in YYYY-MM-DD (defaults to today)
+            no_cache: Whether to bypass local cache
+            
+        Returns:
+            Flight status report with scheduled vs actual times, terminals, gates, and delay minutes.
+        """
+        from mcp_flight_search.services.aerodatabox_service import get_flight_status
+        return get_flight_status(flight_number, date=date, use_cache=not no_cache)
+
+    @mcp.tool()
+    def airport_fids_tool(
+        airport_code: str,
+        direction: str = "arrivals",
+        hours: int = 6,
+        no_cache: bool = False,
+    ):
+        """
+        Get live airport Flight Information Display System (FIDS) board (Arrivals or Departures) via AeroDataBox.
+        
+        Args:
+            airport_code: 3-letter IATA (e.g. HAN, SGN, CAN, PVG) or 4-letter ICAO code (e.g. VVNB)
+            direction: 'arrivals', 'departures', or 'both'
+            hours: Lookahead hours window (1-12 hours, default: 6)
+            no_cache: Whether to bypass local cache
+            
+        Returns:
+            Airport FIDS flight board with gates, terminals, delays, and statuses.
+        """
+        from mcp_flight_search.services.aerodatabox_service import get_airport_fids
+        return get_airport_fids(airport_code, direction=direction, hours=hours, use_cache=not no_cache)
+
+    @mcp.tool()
+    def airport_info_tool(
+        airport_code: str,
+        no_cache: bool = False,
+    ):
+        """
+        Get airport details (name, IATA/ICAO, elevation, runway count, timezone) via AeroDataBox.
+        
+        Args:
+            airport_code: 3-letter IATA or 4-letter ICAO airport code
+            no_cache: Whether to bypass local cache
+            
+        Returns:
+            Technical airport metadata and geography.
+        """
+        from mcp_flight_search.services.aerodatabox_service import get_airport_info
+        return get_airport_info(airport_code, use_cache=not no_cache)
+
+    @mcp.tool()
     def ground_alternative_tool(origin: str, destination: str):
         """
         Check if there are faster/cheaper ground or high-speed rail alternatives between two cities/airports.
@@ -94,7 +154,7 @@ def register_tools(mcp):
         Returns:
             A status message indicating the server is online
         """
-        return {"status": "online", "message": "MCP Flight Search server is running"}
+        return {"status": "online", "message": "MCP Flight Search & AeroDataBox server is running"}
     
     logger.debug("Model Context Protocol tools registered")
 
