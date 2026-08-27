@@ -26,7 +26,20 @@ An enhanced, production-ready **Model Context Protocol (MCP) Flight Search Serve
 
 ## 🚀 Quick Start
 
-### 1. Installation
+### ⚡ One-Line Install via Smithery (Claude / Cursor / Windsurf)
+
+```bash
+# For Claude Desktop
+npx -y @smithery/cli install @vecyang1/mcp-flight-search --client claude
+
+# For Cursor
+npx -y @smithery/cli install @vecyang1/mcp-flight-search --client cursor
+
+# For Windsurf
+npx -y @smithery/cli install @vecyang1/mcp-flight-search --client windsurf
+```
+
+### Manual Installation
 
 ```bash
 # Clone the repository
